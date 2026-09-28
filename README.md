@@ -103,6 +103,63 @@ curl -X PATCH http://localhost:3000/tasks/<id>/complete
 
 ---
 
+## Assignment Completion
+
+### 1. Testing completed
+- API integration tests using Jest + Supertest
+- taskService unit tests
+- 39 total tests passing
+
+### 2. Bug discovered and fixed
+The pagination offset bug was discovered through failing pagination integration tests.
+
+The implementation originally used:
+
+```js
+const offset = page * limit;
+```
+
+This was corrected to:
+
+```js
+const offset = (page - 1) * limit;
+```
+
+This fixes the off-by-one issue where page numbers were treated as zero-based incorrectly, causing the first page to skip records and later pages to return the wrong slice.
+
+### 3. New feature
+Implemented `PATCH /tasks/:id/assign`.
+
+It includes:
+- request validation for the `assignee` field
+- 404 handling for missing tasks
+- tests covering valid and invalid input cases
+- assignment persistence in the in-memory task store
+
+### 4. Coverage
+Current coverage report:
+
+- Statements: 95.54%
+- Branches: 93.18%
+- Functions: 93.33%
+- Lines: 95.10%
+
+### 5. What I would test next
+- additional boundary cases for very large or empty result sets
+- concurrency and state-related scenarios around in-memory updates
+- more production-like integration scenarios with real request sequences
+
+### 6. What surprised me
+The pagination implementation looked reasonable at first glance, but the integration tests exposed an off-by-one offset bug that was easy to miss without automated coverage.
+
+### 7. Questions before production
+- What is the expected source of truth for task assignments?
+- Should reassignment of an already-assigned task be allowed?
+- Are authentication and authorization required?
+- Should task data eventually be persisted in a database?
+
+---
+
 ## What to Submit
 
 See [ASSIGNMENT.md](./ASSIGNMENT.md) for full submission requirements. At minimum, include:
